@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
@@ -85,6 +84,13 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-24 relative">
+      {/* Absolute Top Disclaimer */}
+      <div className="w-full bg-slate-950 text-center py-1.5 px-4 border-b border-slate-800/50">
+        <p className="text-slate-500 text-[10px] font-medium tracking-tight uppercase">
+          (I dont recommend you usig this buy you can why did i make this public?)
+        </p>
+      </div>
+
       <Navbar activeTab={currentTab} setActiveTab={setActiveTab} aiEnabled={aiEnabled} />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
@@ -226,7 +232,7 @@ const App: React.FC = () => {
                 <i className="fa-solid fa-hard-drive text-4xl text-emerald-500"></i>
               </div>
               <h2 className="text-3xl font-bold mb-2">Storage Reclaimer</h2>
-              <p className="text-slate-400 text-lg">Safe and effective ways to get your gigabytes back.</p>
+              <p className="text-slate-400 text-lg">Safe and effective ways to get gigabytes back.</p>
             </div>
 
             {aiEnabled ? (
@@ -240,7 +246,7 @@ const App: React.FC = () => {
                      <p className="text-sm text-slate-400 mb-6">Tell the AI about your disk situation (e.g. "C: drive is red", "64GB SSD").</p>
                      <textarea 
                       className="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-white placeholder-slate-600 focus:ring-2 focus:ring-emerald-500 outline-none min-h-[120px] mb-4 transition-all"
-                      placeholder="Describe your storage problem..."
+                      placeholder="Describe the storage problem..."
                       value={storageContext}
                       onChange={(e) => setStorageContext(e.target.value)}
                      />
@@ -282,7 +288,7 @@ const App: React.FC = () => {
                   ) : (
                     <div className="flex-1 border-2 border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center text-slate-600 p-12 text-center">
                       <i className="fa-solid fa-folder-open text-6xl mb-4 opacity-20"></i>
-                      <p className="text-lg font-medium">Ready for your storage audit.</p>
+                      <p className="text-lg font-medium">Ready for the storage audit.</p>
                       <p className="text-sm">Run the AI audit to find hidden space leaks.</p>
                     </div>
                   )}
@@ -302,7 +308,7 @@ const App: React.FC = () => {
                    </div>
                    <div className="space-y-4">
                      <p className="text-sm font-bold text-slate-300 uppercase">2. Remove Hibernation File</p>
-                     <p className="text-xs text-slate-500">Reclaim space equal to your RAM size. Removes hiberfil.sys.</p>
+                     <p className="text-xs text-slate-500">Reclaim space equal to RAM size. Removes hiberfil.sys.</p>
                      <CodeBlock code="powercfg -h off" />
                    </div>
                    <div className="space-y-4">
@@ -328,7 +334,7 @@ const App: React.FC = () => {
                 <i className="fa-solid fa-circle-question text-5xl text-blue-400"></i>
               </div>
               <h2 className="text-3xl font-bold mb-3 tracking-tight">Problem Solver</h2>
-              <p className="text-slate-400 text-lg">Describe exactly what is bothering you on your PC.</p>
+              <p className="text-slate-400 text-lg">Describe exactly what is bothering you on the PC.</p>
             </div>
 
             <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden backdrop-blur-md">
@@ -336,10 +342,10 @@ const App: React.FC = () => {
                 <i className="fa-solid fa-stethoscope text-[12rem] rotate-12"></i>
               </div>
               <div className="mb-6 relative z-10">
-                <label className="block text-xs font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Describe Your Windows Headache</label>
+                <label className="block text-xs font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Describe the Windows Headache</label>
                 <textarea 
                   className="w-full bg-slate-950/80 border border-slate-700 rounded-2xl p-6 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none min-h-[180px] text-lg leading-relaxed shadow-inner"
-                  placeholder="e.g., 'My taskbar is frozen after the latest update'..."
+                  placeholder="e.g., 'The taskbar is frozen after the latest update'..."
                   value={problemQuery}
                   onChange={(e) => setProblemQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleTroubleshoot())}
@@ -392,7 +398,7 @@ const App: React.FC = () => {
               <div>
                 <h4 className="font-bold text-red-400 uppercase tracking-widest text-xs mb-1">Critical Hardware Warning</h4>
                 <p className="text-slate-300 leading-relaxed italic font-medium">
-                  If your CPU/GPU is fried, roasted, cracked, There is also no fix for this Its done. you might need to get a new CPU/GPU Just reminding!
+                  If the CPU/GPU is fried, roasted, cracked, There is also no fix for this Its done. you might need to get a new CPU/GPU Just reminding!
                 </p>
               </div>
             </div>
@@ -512,7 +518,7 @@ const App: React.FC = () => {
                   <span className="font-bold uppercase tracking-widest text-xs">Summary of Fixes</span>
                 </div>
                 <p className="text-slate-400 text-sm leading-relaxed">
-                  The long fixes boil down to removing unused apps (Cortana/Copilot), stopping Microsoft from tracking you (Telemetry), and cleaning up hidden update files (WinSxS). If your hardware clicks or smells like smoke, no command will save it—buy new parts!
+                  The long fixes boil down to removing unused apps (Cortana/Copilot), stopping tracking (Telemetry), and cleaning up hidden update files (WinSxS). If hardware clicks or smells like smoke, no command will save it—buy new parts!
                 </p>
               </div>
             </div>
@@ -526,7 +532,7 @@ const App: React.FC = () => {
                 <i className="fa-solid fa-sparkles text-5xl text-blue-500"></i>
               </div>
               <h2 className="text-3xl font-bold mb-3 tracking-tight">AI Optimization Strategy</h2>
-              <p className="text-slate-400 text-lg">Describe your system specs or issues, and the AI will tell you exactly what is bloatware for your specific case.</p>
+              <p className="text-slate-400 text-lg">Describe the system specs or issues, and the AI will tell you exactly what is bloatware for the specific case.</p>
             </div>
 
             <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl shadow-2xl relative overflow-hidden backdrop-blur-md">
@@ -599,16 +605,16 @@ const App: React.FC = () => {
             
             <div className="space-y-4 text-slate-300 leading-relaxed">
               <p>
-                <strong>WinBuster</strong> is an open-source companion designed to help you navigate the complexity of modern Windows systems. 
+                <strong>WinBuster</strong> is an open-source companion designed to help navigate the complexity of modern Windows systems. 
               </p>
               <p>
-                The mission is to empower users to reclaim their hardware by explaining exactly what pre-installed components do, why they might be considered "bloat", and how to safely optimize them without breaking core functionality.
+                The mission is to empower users to reclaim hardware by explaining exactly what pre-installed components do, why they might be considered "bloat", and how to safely optimize them without breaking core functionality.
               </p>
               <p className="text-sm text-slate-500">
                 Created by <strong>me and Gemini</strong>.
               </p>
               <p className="text-sm text-slate-500 italic">
-                Powered by Gemini AI for deep system analysis and real-time troubleshooting. Always remember: Knowledge is your best tool—Backup before you optimize!
+                Powered by Gemini AI for deep system analysis and real-time troubleshooting. Always remember: Knowledge is the best tool—Backup before optimizing!
               </p>
             </div>
             
