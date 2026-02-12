@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { CodeBlock } from './components/CodeBlock';
@@ -24,6 +24,8 @@ const Windows10Logo = ({ className }: { className?: string }) => (
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('debloat');
   const [winVersion, setWinVersion] = useState<WindowsVersion>('win11');
+  const [aiEnabled, setAiEnabled] = useState(true);
+  
   const [aiQuery, setAiQuery] = useState('');
   const [aiAdvice, setAiAdvice] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -41,8 +43,16 @@ const App: React.FC = () => {
 
   const [showAbout, setShowAbout] = useState(false);
 
+  // Filter tabs if AI is disabled
+  const currentTab = useMemo(() => {
+    if (!aiEnabled && (activeTab === 'ai' || activeTab === 'troubleshoot')) {
+      return 'debloat';
+    }
+    return activeTab;
+  }, [aiEnabled, activeTab]);
+
   const handleAiConsult = async () => {
-    if (!aiQuery.trim()) return;
+    if (!aiQuery.trim() || !aiEnabled) return;
     setIsAiLoading(true);
     const advice = await geminiService.getOptimizationAdvice(aiQuery, winVersion);
     setAiAdvice(advice || "No advice found.");
@@ -50,6 +60,7 @@ const App: React.FC = () => {
   };
 
   const handleStorageAudit = async () => {
+    if (!aiEnabled) return;
     setIsStorageLoading(true);
     const audit = await geminiService.getStorageAudit(winVersion, storageContext);
     setStorageAudit(audit);
@@ -57,7 +68,7 @@ const App: React.FC = () => {
   };
 
   const handleTroubleshoot = async () => {
-    if (!problemQuery.trim()) return;
+    if (!problemQuery.trim() || !aiEnabled) return;
     setIsProblemLoading(true);
     const solution = await geminiService.troubleshootProblem(problemQuery, winVersion);
     setProblemSolution(solution);
@@ -65,6 +76,7 @@ const App: React.FC = () => {
   };
 
   const handleAnalyzeItem = async (id: string, title: string, description: string) => {
+    if (!aiEnabled) return;
     setAnalyzingItems(prev => ({ ...prev, [id]: true }));
     const explanation = await geminiService.explainBloatware(title, description, winVersion);
     setItemExplanations(prev => ({ ...prev, [id]: explanation }));
@@ -73,53 +85,76 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-24 relative">
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar activeTab={currentTab} setActiveTab={setActiveTab} aiEnabled={aiEnabled} />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
         
-        {/* OS Selection with Proper Logos */}
-        <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-6 bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+        {/* OS & AI Selection Bar */}
+        <div className="mb-8 flex flex-col lg:flex-row items-center justify-between gap-6 bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
           <div className="flex items-center gap-4">
             <div className={`p-3 rounded-xl ${winVersion === 'win11' ? 'bg-blue-500/10 text-blue-400' : 'bg-sky-500/10 text-sky-400'}`}>
               {winVersion === 'win11' ? <Windows11Logo className="w-8 h-8" /> : <Windows10Logo className="text-3xl" />}
             </div>
             <div>
               <h2 className="text-xl font-bold">Targeting Windows {winVersion === 'win11' ? '11' : '10'}</h2>
-              <p className="text-slate-400 text-sm">Logos and tweaks strictly categorized for your OS.</p>
+              <p className="text-slate-400 text-sm">
+                {aiEnabled ? 'AI Intelligence Active' : 'Manual Mode (AI Disabled)'}
+              </p>
             </div>
           </div>
-          <div className="flex bg-slate-900/80 p-1.5 rounded-xl border border-slate-700 w-full sm:w-auto">
-            <button 
-              onClick={() => setWinVersion('win10')}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 py-2.5 rounded-lg transition-all ${winVersion === 'win10' ? 'bg-sky-600 text-white shadow-lg shadow-sky-900/40' : 'text-slate-400 hover:text-white'}`}
-            >
-              <Windows10Logo className="text-lg" /> Windows 10
-            </button>
-            <button 
-              onClick={() => setWinVersion('win11')}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 py-2.5 rounded-lg transition-all ${winVersion === 'win11' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:text-white'}`}
-            >
-              <Windows11Logo className="w-4 h-4" /> Windows 11
-            </button>
+          
+          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+            {/* AI Toggle */}
+            <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-hidden">
+               <button 
+                onClick={() => setAiEnabled(true)}
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all text-[10px] font-bold uppercase tracking-wider ${aiEnabled ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+               >
+                 <i className="fa-solid fa-brain"></i>
+                 AI ON
+               </button>
+               <button 
+                onClick={() => setAiEnabled(false)}
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all text-[10px] font-bold uppercase tracking-wider ${!aiEnabled ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+               >
+                 <i className="fa-solid fa-power-off"></i>
+                 DISABLE AI
+               </button>
+            </div>
+
+            <div className="flex bg-slate-900/80 p-1.5 rounded-xl border border-slate-700">
+              <button 
+                onClick={() => setWinVersion('win10')}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 py-2.5 rounded-lg transition-all ${winVersion === 'win10' ? 'bg-sky-600 text-white shadow-lg shadow-sky-900/40' : 'text-slate-400 hover:text-white'}`}
+              >
+                <Windows10Logo className="text-lg" /> Win 10
+              </button>
+              <button 
+                onClick={() => setWinVersion('win11')}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 py-2.5 rounded-lg transition-all ${winVersion === 'win11' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:text-white'}`}
+              >
+                <Windows11Logo className="w-4 h-4" /> Win 11
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Dynamic Content Sections */}
-        {activeTab === 'debloat' && (
+        {currentTab === 'debloat' && (
           <section className="space-y-6 animate-in fade-in duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center space-x-3 text-amber-500 bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl">
                 <i className="fa-solid fa-triangle-exclamation text-2xl flex-shrink-0"></i>
                 <div className="text-sm">
-                  <strong className="block mb-1">Information-First Architecture</strong>
-                  WinBuster uses AI to explain why items are bloatware <strong>and why you might need them</strong> before you take any action.
+                  <strong className="block mb-1">Knowledge-Driven Debloating</strong>
+                  {aiEnabled ? 'Using AI to explain risks vs rewards.' : 'Manual mode: No AI advice. Use commands at your own risk.'}
                 </div>
               </div>
               <div className="flex items-center space-x-3 text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
                 <i className="fa-solid fa-hard-drive text-2xl flex-shrink-0"></i>
                 <div className="text-sm">
                   <strong className="block mb-1">Massive Storage Savings</strong>
-                  Look for the <span className="text-emerald-400 font-bold">High Impact</span> items below to reclaim 20GB-50GB+ of storage space.
+                  Reclaim 20GB-50GB+ by targeting High Impact system items.
                 </div>
               </div>
             </div>
@@ -142,19 +177,21 @@ const App: React.FC = () => {
                       <p className="text-slate-400 leading-relaxed">{item.description}</p>
                     </div>
                     
-                    <Button 
-                      variant="secondary" 
-                      size="sm"
-                      onClick={() => handleAnalyzeItem(item.id, item.title, item.description)}
-                      isLoading={analyzingItems[item.id]}
-                      className="flex-shrink-0 bg-slate-900 border border-slate-700 hover:border-blue-500"
-                    >
-                      <i className="fa-solid fa-wand-magic-sparkles mr-2 text-blue-400"></i>
-                      AI Decision Support
-                    </Button>
+                    {aiEnabled && (
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={() => handleAnalyzeItem(item.id, item.title, item.description)}
+                        isLoading={analyzingItems[item.id]}
+                        className="flex-shrink-0 bg-slate-900 border border-slate-700 hover:border-blue-500"
+                      >
+                        <i className="fa-solid fa-wand-magic-sparkles mr-2 text-blue-400"></i>
+                        AI Decision Support
+                      </Button>
+                    )}
                   </div>
 
-                  {itemExplanations[item.id] && (
+                  {aiEnabled && itemExplanations[item.id] && (
                     <div className="mb-6 p-5 bg-blue-600/5 border border-blue-500/20 rounded-xl animate-in slide-in-from-top-2">
                       <div className="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase mb-3 tracking-widest border-b border-blue-500/10 pb-2">
                         <i className="fa-solid fa-brain"></i> AI Deep Analysis: {item.title}
@@ -182,89 +219,116 @@ const App: React.FC = () => {
           </section>
         )}
 
-        {activeTab === 'storage' && (
+        {currentTab === 'storage' && (
           <section className="space-y-8 animate-in slide-in-from-right-4 duration-500">
             <div className="text-center max-w-2xl mx-auto">
               <div className="inline-flex p-4 rounded-full bg-emerald-600/10 border border-emerald-500/20 mb-4">
                 <i className="fa-solid fa-hard-drive text-4xl text-emerald-500"></i>
               </div>
               <h2 className="text-3xl font-bold mb-2">Storage Reclaimer</h2>
-              <p className="text-slate-400">Deep, safe, and effective ways to get your gigabytes back. No fluff, just results.</p>
+              <p className="text-slate-400 text-lg">Safe and effective ways to get your gigabytes back.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl shadow-xl backdrop-blur-md">
-                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                     <i className="fa-solid fa-magnifying-glass-chart text-emerald-400"></i>
-                     Custom Storage Audit
-                   </h3>
-                   <p className="text-sm text-slate-400 mb-6">Tell the AI about your disk situation (e.g. "C: drive is red", "64GB SSD", "Game files taking too much space").</p>
-                   <textarea 
-                    className="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-white placeholder-slate-600 focus:ring-2 focus:ring-emerald-500 outline-none min-h-[120px] mb-4 transition-all"
-                    placeholder="Describe your storage problem..."
-                    value={storageContext}
-                    onChange={(e) => setStorageContext(e.target.value)}
-                   />
-                   <Button 
-                    variant="primary" 
-                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-900/20"
-                    onClick={handleStorageAudit}
-                    isLoading={isStorageLoading}
-                   >
-                     <i className="fa-solid fa-wand-sparkles mr-2"></i>
-                     Start AI Storage Audit
-                   </Button>
+            {aiEnabled ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl shadow-xl backdrop-blur-md">
+                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                       <i className="fa-solid fa-magnifying-glass-chart text-emerald-400"></i>
+                       Custom Storage Audit
+                     </h3>
+                     <p className="text-sm text-slate-400 mb-6">Tell the AI about your disk situation (e.g. "C: drive is red", "64GB SSD").</p>
+                     <textarea 
+                      className="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-white placeholder-slate-600 focus:ring-2 focus:ring-emerald-500 outline-none min-h-[120px] mb-4 transition-all"
+                      placeholder="Describe your storage problem..."
+                      value={storageContext}
+                      onChange={(e) => setStorageContext(e.target.value)}
+                     />
+                     <Button 
+                      variant="primary" 
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-900/20"
+                      onClick={handleStorageAudit}
+                      isLoading={isStorageLoading}
+                     >
+                       <i className="fa-solid fa-wand-sparkles mr-2"></i>
+                       Start AI Storage Audit
+                     </Button>
+                  </div>
+                  <div className="bg-emerald-500/5 border border-emerald-500/10 p-6 rounded-2xl">
+                    <h4 className="font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                      <i className="fa-solid fa-bolt"></i> Storage Pro Tip
+                    </h4>
+                    <p className="text-sm text-slate-400 leading-relaxed">Check update caches. Reclaim 5GB+ instantly by cleaning Delivery Optimization.</p>
+                  </div>
                 </div>
 
-                <div className="bg-emerald-500/5 border border-emerald-500/10 p-6 rounded-2xl">
-                  <h4 className="font-bold text-emerald-400 mb-3 flex items-center gap-2">
-                    <i className="fa-solid fa-bolt"></i>
-                    Storage Pro Tip
-                  </h4>
-                  <p className="text-sm text-slate-400 leading-relaxed">
-                    Always check the <strong>Delivery Optimization</strong> folder. Windows often caches updates long after they're installed. Cleaning this via "Disk Cleanup" or PowerShell can reclaim 5GB+ instantly.
-                  </p>
+                <div className="flex flex-col">
+                  {storageAudit ? (
+                    <div className="bg-slate-800/40 border border-emerald-500/20 p-8 rounded-3xl animate-in fade-in zoom-in-95 h-full overflow-y-auto max-h-[600px] scrollbar-thin">
+                      <div className="flex items-center justify-between mb-6 sticky top-0 bg-slate-800/40 backdrop-blur-md py-2 z-10">
+                        <span className="text-emerald-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                          <i className="fa-solid fa-brain"></i> Brain-Thanking Advice
+                        </span>
+                        <button onClick={() => setStorageAudit(null)} className="text-slate-500 hover:text-white transition-colors">
+                          <i className="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
+                      <div className="prose prose-invert max-w-none text-slate-300">
+                        {storageAudit.split('```').map((block, i) => (
+                          i % 2 === 1 ? <CodeBlock key={i} code={block.replace('powershell\n', '').replace('bash\n', '').replace('cmd\n', '')} /> : <div key={i} dangerouslySetInnerHTML={{ __html: block.replace(/\n/g, '<br/>') }} />
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 border-2 border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center text-slate-600 p-12 text-center">
+                      <i className="fa-solid fa-folder-open text-6xl mb-4 opacity-20"></i>
+                      <p className="text-lg font-medium">Ready for your storage audit.</p>
+                      <p className="text-sm">Run the AI audit to find hidden space leaks.</p>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              <div className="flex flex-col">
-                {storageAudit ? (
-                  <div className="bg-slate-800/40 border border-emerald-500/20 p-8 rounded-3xl animate-in fade-in zoom-in-95 h-full overflow-y-auto max-h-[600px] scrollbar-thin">
-                    <div className="flex items-center justify-between mb-6 sticky top-0 bg-slate-800/40 backdrop-blur-md py-2 z-10">
-                      <span className="text-emerald-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                        <i className="fa-solid fa-brain"></i> Brain-Thanking Advice
-                      </span>
-                      <button onClick={() => setStorageAudit(null)} className="text-slate-500 hover:text-white transition-colors">
-                        <i className="fa-solid fa-xmark"></i>
-                      </button>
-                    </div>
-                    <div className="prose prose-invert max-w-none text-slate-300">
-                      {storageAudit.split('```').map((block, i) => (
-                        i % 2 === 1 ? <CodeBlock key={i} code={block.replace('powershell\n', '').replace('bash\n', '').replace('cmd\n', '')} /> : <div key={i} dangerouslySetInnerHTML={{ __html: block.replace(/\n/g, '<br/>') }} />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 border-2 border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center text-slate-600 p-12 text-center">
-                    <i className="fa-solid fa-folder-open text-6xl mb-4 opacity-20"></i>
-                    <p className="text-lg font-medium">Ready for your storage audit.</p>
-                    <p className="text-sm">Run the AI audit to find massive amounts of space you didn't know you could save.</p>
-                  </div>
-                )}
+            ) : (
+              <div className="max-w-4xl mx-auto bg-slate-800/40 border border-slate-700 p-8 rounded-3xl shadow-xl">
+                 <h3 className="text-xl font-bold mb-6 flex items-center gap-3 text-emerald-400">
+                   <i className="fa-solid fa-broom"></i>
+                   Manual Cleaning Essentials
+                 </h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="space-y-4">
+                     <p className="text-sm font-bold text-slate-300 uppercase">1. Component Store Cleanup</p>
+                     <p className="text-xs text-slate-500">Deletes backup versions of Windows Updates. High safety.</p>
+                     <CodeBlock code="dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase" />
+                   </div>
+                   <div className="space-y-4">
+                     <p className="text-sm font-bold text-slate-300 uppercase">2. Remove Hibernation File</p>
+                     <p className="text-xs text-slate-500">Reclaim space equal to your RAM size. Removes hiberfil.sys.</p>
+                     <CodeBlock code="powercfg -h off" />
+                   </div>
+                   <div className="space-y-4">
+                     <p className="text-sm font-bold text-slate-300 uppercase">3. Compact System Files</p>
+                     <p className="text-xs text-slate-500">Transparently compresses OS files. Best for 64GB-128GB SSDs.</p>
+                     <CodeBlock code="compact.exe /CompactOS:always" />
+                   </div>
+                   <div className="space-y-4">
+                     <p className="text-sm font-bold text-slate-300 uppercase">4. Clear Windows Update Cache</p>
+                     <p className="text-xs text-slate-500">Stop update services and clear SoftwareDistribution folder.</p>
+                     <CodeBlock code="net stop wuauserv; net stop bits; del /f /s /q C:\Windows\SoftwareDistribution\*.*" />
+                   </div>
+                 </div>
               </div>
-            </div>
+            )}
           </section>
         )}
 
-        {activeTab === 'troubleshoot' && (
+        {currentTab === 'troubleshoot' && aiEnabled && (
           <section className="max-w-4xl mx-auto space-y-8 animate-in slide-in-from-bottom-8 duration-500">
             <div className="text-center">
               <div className="inline-flex p-5 rounded-3xl bg-blue-600/10 border border-blue-500/20 mb-6 shadow-xl">
                 <i className="fa-solid fa-circle-question text-5xl text-blue-400"></i>
               </div>
               <h2 className="text-3xl font-bold mb-3 tracking-tight">Problem Solver</h2>
-              <p className="text-slate-400 text-lg">Describe exactly what is bothering you on your PC. Slow start? Broken menu? Strange error code?</p>
+              <p className="text-slate-400 text-lg">Describe exactly what is bothering you on your PC.</p>
             </div>
 
             <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden backdrop-blur-md">
@@ -275,7 +339,7 @@ const App: React.FC = () => {
                 <label className="block text-xs font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Describe Your Windows Headache</label>
                 <textarea 
                   className="w-full bg-slate-950/80 border border-slate-700 rounded-2xl p-6 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none min-h-[180px] text-lg leading-relaxed shadow-inner"
-                  placeholder="e.g., 'My taskbar is frozen after the latest update', or 'The Start menu search takes 10 seconds to respond', or 'Error code 0x80070005 when updating...'"
+                  placeholder="e.g., 'My taskbar is frozen after the latest update'..."
                   value={problemQuery}
                   onChange={(e) => setProblemQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleTroubleshoot())}
@@ -318,8 +382,21 @@ const App: React.FC = () => {
           </section>
         )}
 
-        {activeTab === 'fixes' && (
+        {currentTab === 'fixes' && (
           <section className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+            {/* CPU/GPU Hardware Warning */}
+            <div className="bg-red-600/10 border-2 border-red-500/30 p-6 rounded-2xl flex items-start gap-4 mb-8">
+              <div className="bg-red-500 p-2 rounded-lg text-white">
+                 <i className="fa-solid fa-fire text-xl"></i>
+              </div>
+              <div>
+                <h4 className="font-bold text-red-400 uppercase tracking-widest text-xs mb-1">Critical Hardware Warning</h4>
+                <p className="text-slate-300 leading-relaxed italic font-medium">
+                  If your CPU/GPU is fried, roasted, cracked, There is also no fix for this Its done. you might need to get a new CPU/GPU Just reminding!
+                </p>
+              </div>
+            </div>
+
             <div className="mb-6">
               <h2 className="text-2xl font-bold">Critical System Fixes</h2>
               <p className="text-slate-400">Manual adjustments for a cleaner, faster Windows interface.</p>
@@ -342,7 +419,7 @@ const App: React.FC = () => {
           </section>
         )}
 
-        {activeTab === 'apps' && (
+        {currentTab === 'apps' && (
           <section className="animate-in slide-in-from-bottom-4 duration-500">
             <div className="mb-8">
               <h2 className="text-2xl font-bold">Open-Source Essentials</h2>
@@ -388,7 +465,61 @@ const App: React.FC = () => {
           </section>
         )}
 
-        {activeTab === 'ai' && (
+        {currentTab === 'tldr' && (
+          <section className="animate-in zoom-in-95 duration-500 max-w-4xl mx-auto">
+            <div className="text-center mb-10">
+              <div className="inline-flex p-4 rounded-2xl bg-emerald-600/10 border border-emerald-500/20 mb-4">
+                <i className="fa-solid fa-bolt-lightning text-3xl text-emerald-500"></i>
+              </div>
+              <h2 className="text-3xl font-bold mb-2">TL;DR - The Short Way</h2>
+              <p className="text-slate-400">If the fixes are too long, here are the absolute essentials in one place.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="bg-slate-800/40 border border-slate-700 p-8 rounded-3xl shadow-xl">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                  <i className="fa-solid fa-list-check text-blue-400"></i>
+                  The "Instant Speed" Checklist
+                </h3>
+                <ul className="space-y-6">
+                  <li className="flex gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">1</div>
+                    <div>
+                      <p className="font-semibold text-slate-100 mb-2">Deep Clean Storage (DISM)</p>
+                      <CodeBlock code="dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase" />
+                    </div>
+                  </li>
+                  <li className="flex gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">2</div>
+                    <div>
+                      <p className="font-semibold text-slate-100 mb-2">Reclaim RAM (Kill Telemetry)</p>
+                      <CodeBlock code="sc config DiagTrack start= disabled; sc stop DiagTrack" />
+                    </div>
+                  </li>
+                  <li className="flex gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">3</div>
+                    <div>
+                      <p className="font-semibold text-slate-100 mb-2">Compress System (Small Drives Only)</p>
+                      <CodeBlock code="compact.exe /CompactOS:always" />
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-700/50 p-6 rounded-2xl">
+                <div className="flex items-center gap-3 mb-4 text-emerald-400">
+                  <i className="fa-solid fa-circle-info"></i>
+                  <span className="font-bold uppercase tracking-widest text-xs">Summary of Fixes</span>
+                </div>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  The long fixes boil down to removing unused apps (Cortana/Copilot), stopping Microsoft from tracking you (Telemetry), and cleaning up hidden update files (WinSxS). If your hardware clicks or smells like smoke, no command will save it—buy new parts!
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {currentTab === 'ai' && aiEnabled && (
           <section className="max-w-3xl mx-auto animate-in zoom-in-95 duration-500">
             <div className="text-center mb-10">
               <div className="inline-block p-5 rounded-3xl bg-blue-600/10 mb-6 border border-blue-500/20">
@@ -462,7 +593,7 @@ const App: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold">WinBuster</h2>
-                <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Version V1.26</span>
+                <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Version V1.26.2.12</span>
               </div>
             </div>
             
@@ -470,12 +601,11 @@ const App: React.FC = () => {
               <p>
                 <strong>WinBuster</strong> is an open-source companion designed to help you navigate the complexity of modern Windows systems. 
               </p>
-              <div className="p-4 bg-blue-600/10 border-l-4 border-blue-500 rounded-r-xl">
-                 <p className="text-xs font-bold text-blue-400 uppercase mb-2">Privacy Shield Guarantee</p>
-                 <p className="text-sm">WinBuster <strong>Never sends something to microsoft servers</strong>. There are 0 fixes or features in this app that communicate with Microsoft. Your system data stays on your system.</p>
-              </div>
               <p>
-                Our mission is to empower users to reclaim their hardware by explaining exactly what pre-installed components do, why they might be considered "bloat", and how to safely optimize them without breaking core functionality.
+                The mission is to empower users to reclaim their hardware by explaining exactly what pre-installed components do, why they might be considered "bloat", and how to safely optimize them without breaking core functionality.
+              </p>
+              <p className="text-sm text-slate-500">
+                Created by <strong>me and Gemini</strong>.
               </p>
               <p className="text-sm text-slate-500 italic">
                 Powered by Gemini AI for deep system analysis and real-time troubleshooting. Always remember: Knowledge is your best tool—Backup before you optimize!
@@ -497,7 +627,7 @@ const App: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-            <span className="uppercase tracking-widest font-bold">WinBuster V1.26</span>
+            <span className="uppercase tracking-widest font-bold">WinBuster V1.26.2.12</span>
           </div>
           <button 
             onClick={() => setShowAbout(true)}
@@ -516,7 +646,7 @@ const App: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="text-slate-700">|</span>
           <i className="fa-solid fa-brain text-purple-400"></i>
-          <span>AI Insight Enabled</span>
+          <span>{aiEnabled ? 'AI Insight Enabled' : 'Manual Mode Active'}</span>
         </div>
       </footer>
     </div>

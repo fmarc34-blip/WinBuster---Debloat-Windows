@@ -46,11 +46,13 @@ export class GeminiService {
           CRITICAL PHILOSOPHY: 
           If a user describes symptoms of physical hardware failure (like a clicking, internally broken, or split HDD), you MUST say: "If Your Hard Disc Drive (HDD) is internally damaged split, cracked, There is no fix - its done."
           
-          Do not give false hope. If WinBuster determines the hardware is physically incapable or the platter is broken, be blunt. 
+          If the user describes symptoms of a fried, roasted, or cracked CPU/GPU, you MUST say: "If your CPU/GPU is fried, roasted, cracked, There is also no fix for this Its done. you might need to get a new CPU/GPU Just reminding!"
+          
+          Do not give false hope. If WinBuster determines the hardware is physically incapable or a component is broken, be blunt. 
           Only if there is a software-level 'might work' possibility for less severe issues, list it AFTER the hardware death warning.
           
           STRUCTURE YOUR RESPONSE:
-          1. **THE REALITY CHECK**: If it's broken hardware, start with the mandatory phrase: "If Your Hard Disc Drive (HDD) is internally damaged split, cracked, There is no fix - its done."
+          1. **THE REALITY CHECK**: If it's broken hardware, start with the specific mandatory phrase for HDD or CPU/GPU.
           2. **THE 'MIGHT WORK' FIXES**: Only if software recovery is possible for minor corruption.
           3. **STEP-BY-STEP**: Clear instructions (PowerShell, CMD).
           
@@ -100,6 +102,7 @@ export class GeminiService {
         config: {
           systemInstruction: `You are a Windows Optimization Expert. 
           Suggest specific steps to debloat.
+          If the user is complaining about CPU/GPU heat or issues, remind them: "If your CPU/GPU is fried, roasted, cracked, There is also no fix for this Its done. you might need to get a new CPU/GPU Just reminding!"
           Always recommend a Restore Point first.`,
           temperature: 0.7,
         },
