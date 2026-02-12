@@ -21,6 +21,15 @@ export const DEBLOAT_ITEMS: DebloatItem[] = [
     version: 'win11'
   },
   {
+    id: 'hdd-health',
+    title: 'Hard Drive Health Audit (S.M.A.R.T.)',
+    description: 'Check if your drive is physically failing. WARNING: If Your Hard Disc Drive (HDD) is internally damaged split, cracked, There is no fix - its done.',
+    category: 'system',
+    impact: 'high',
+    command: 'wmic diskdrive get status',
+    version: 'both'
+  },
+  {
     id: 'storage-1',
     title: 'Cleanup System Component Store (WinSxS)',
     description: 'Removes old versions of system components replaced by Windows Updates. Can save 5GB-15GB+.',

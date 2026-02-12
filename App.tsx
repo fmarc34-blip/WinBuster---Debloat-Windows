@@ -39,6 +39,8 @@ const App: React.FC = () => {
   const [analyzingItems, setAnalyzingItems] = useState<Record<string, boolean>>({});
   const [itemExplanations, setItemExplanations] = useState<Record<string, string>>({});
 
+  const [showAbout, setShowAbout] = useState(false);
+
   const handleAiConsult = async () => {
     if (!aiQuery.trim()) return;
     setIsAiLoading(true);
@@ -70,7 +72,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pb-24">
+    <div className="min-h-screen flex flex-col pb-24 relative">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
@@ -442,11 +444,67 @@ const App: React.FC = () => {
         )}
       </main>
 
+      {/* About Modal */}
+      {showAbout && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setShowAbout(false)}></div>
+          <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2rem] shadow-2xl relative z-10 max-w-lg w-full animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowAbout(false)}
+              className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"
+            >
+              <i className="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div className="flex items-center gap-4 mb-6">
+              <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-600/20">
+                <i className="fa-brands fa-windows text-white text-3xl"></i>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">WinBuster</h2>
+                <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Version V1.26</span>
+              </div>
+            </div>
+            
+            <div className="space-y-4 text-slate-300 leading-relaxed">
+              <p>
+                <strong>WinBuster</strong> is an open-source companion designed to help you navigate the complexity of modern Windows systems. 
+              </p>
+              <div className="p-4 bg-blue-600/10 border-l-4 border-blue-500 rounded-r-xl">
+                 <p className="text-xs font-bold text-blue-400 uppercase mb-2">Privacy Shield Guarantee</p>
+                 <p className="text-sm">WinBuster <strong>Never sends something to microsoft servers</strong>. There are 0 fixes or features in this app that communicate with Microsoft. Your system data stays on your system.</p>
+              </div>
+              <p>
+                Our mission is to empower users to reclaim their hardware by explaining exactly what pre-installed components do, why they might be considered "bloat", and how to safely optimize them without breaking core functionality.
+              </p>
+              <p className="text-sm text-slate-500 italic">
+                Powered by Gemini AI for deep system analysis and real-time troubleshooting. Always remember: Knowledge is your best tool—Backup before you optimize!
+              </p>
+            </div>
+            
+            <Button 
+              className="w-full mt-8" 
+              onClick={() => setShowAbout(false)}
+            >
+              Got it, thanks!
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Footer Status */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-slate-800 p-4 flex flex-col sm:flex-row justify-center items-center text-[10px] text-slate-500 gap-6 z-40 backdrop-blur-xl">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-          <span className="uppercase tracking-widest font-bold">WinBuster Insight v2.1</span>
+      <footer className="fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800 p-4 flex flex-col sm:flex-row justify-center items-center text-[10px] text-slate-500 gap-6 z-40 backdrop-blur-xl">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+            <span className="uppercase tracking-widest font-bold">WinBuster V1.26</span>
+          </div>
+          <button 
+            onClick={() => setShowAbout(true)}
+            className="text-slate-400 hover:text-blue-400 font-bold transition-colors uppercase tracking-[0.1em]"
+          >
+            About WinBuster
+          </button>
         </div>
         <div className="flex items-center gap-2">
            <span className="text-slate-700">|</span>
@@ -458,7 +516,7 @@ const App: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="text-slate-700">|</span>
           <i className="fa-solid fa-brain text-purple-400"></i>
-          <span>Gemini AI Analysis Enabled</span>
+          <span>AI Insight Enabled</span>
         </div>
       </footer>
     </div>

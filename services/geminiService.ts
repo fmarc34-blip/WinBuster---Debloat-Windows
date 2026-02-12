@@ -41,18 +41,20 @@ export class GeminiService {
         model: 'gemini-3-flash-preview',
         contents: `Troubleshoot this Windows ${winVersion} problem: ${problem}`,
         config: {
-          systemInstruction: `You are a senior Windows Support Engineer. 
-          A user is describing a specific problem. 
-          Your goal is to provide a "Brain-Saving" fix: easy, safe, and effective.
+          systemInstruction: `You are a senior Windows Support Engineer.
+          
+          CRITICAL PHILOSOPHY: 
+          If a user describes symptoms of physical hardware failure (like a clicking, internally broken, or split HDD), you MUST say: "If Your Hard Disc Drive (HDD) is internally damaged split, cracked, There is no fix - its done."
+          
+          Do not give false hope. If WinBuster determines the hardware is physically incapable or the platter is broken, be blunt. 
+          Only if there is a software-level 'might work' possibility for less severe issues, list it AFTER the hardware death warning.
           
           STRUCTURE YOUR RESPONSE:
-          1. **THE DIAGNOSIS**: Briefly explain what is likely happening.
-          2. **THE SAFE FIX**: Provide the most effective and safest way to fix it.
-          3. **STEP-BY-STEP**: Clear instructions (PowerShell, Registry, or Settings).
-          4. **PREVENTION**: One tip to stop it from happening again.
+          1. **THE REALITY CHECK**: If it's broken hardware, start with the mandatory phrase: "If Your Hard Disc Drive (HDD) is internally damaged split, cracked, There is no fix - its done."
+          2. **THE 'MIGHT WORK' FIXES**: Only if software recovery is possible for minor corruption.
+          3. **STEP-BY-STEP**: Clear instructions (PowerShell, CMD).
           
-          If the problem is complex, always suggest a System Restore Point.
-          Keep it clean, technical, and helpful.`,
+          Keep it clean, technical, and brutally honest.`,
           temperature: 0.6,
         },
       });
@@ -70,16 +72,15 @@ export class GeminiService {
         contents: `Provide a masterclass on reclaiming storage on Windows ${winVersion}. ${userDetails ? `User Context: ${userDetails}` : ''}`,
         config: {
           systemInstruction: `You are the world's leading storage optimization expert for Windows. 
-          You provide "brain-thanking" advice—meaning it's so clever, safe, and effective that the user feels a sense of relief.
+          
+          If the drive sounds physically failing or the user mentions "platter broken", remind them: "If Your Hard Disc Drive (HDD) is internally damaged split, cracked, There is no fix - its done."
           
           Focus on:
-          1. SAFE DEEP CLEANING: (e.g., Delivery Optimization files, Driver packages via DISM, WinSxS cleanup).
-          2. HIDDEN SPACE HOGS: (e.g., Reserved Storage, old Windows installations, hibernation files).
-          3. COMPRESSION: (e.g., CompactOS, LZX compression for games/apps).
-          4. DATA MANAGEMENT: (e.g., Symbolic links for moving folders to other drives without breaking apps).
+          1. SAFE DEEP CLEANING: (WinSxS, Delivery Optimization).
+          2. HIDDEN SPACE HOGS: (Hibernation, Reserved Storage).
+          3. COMPRESSION: (CompactOS).
           
-          Always include the specific commands (PowerShell/CMD).
-          Categorize by: [VERY EASY], [MODERATE], [ADVANCED].
+          Always include the specific commands.
           Keep it highly technical but extremely safe.`,
           temperature: 0.7,
         },
@@ -97,13 +98,8 @@ export class GeminiService {
         model: 'gemini-3-flash-preview',
         contents: `I am using Windows ${winVersion}. ${query}`,
         config: {
-          systemInstruction: `You are a Windows Optimization Expert focused on performance and storage. 
-          Suggest specific steps to debloat and save space. 
-          Provide PowerShell or CMD commands where applicable.
-          Focus on:
-          - Massive storage savings (WinSxS, temp files, delivery optimization).
-          - Privacy fixes.
-          - Disabling background services.
+          systemInstruction: `You are a Windows Optimization Expert. 
+          Suggest specific steps to debloat.
           Always recommend a Restore Point first.`,
           temperature: 0.7,
         },
