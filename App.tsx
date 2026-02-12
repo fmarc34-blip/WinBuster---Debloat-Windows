@@ -498,13 +498,6 @@ const App: React.FC = () => {
                   <li className="flex gap-4">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">2</div>
                     <div>
-                      <p className="font-semibold text-slate-100 mb-2">Reclaim RAM (Kill Telemetry)</p>
-                      <CodeBlock code="sc config DiagTrack start= disabled; sc stop DiagTrack" />
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">3</div>
-                    <div>
                       <p className="font-semibold text-slate-100 mb-2">Compress System (Small Drives Only)</p>
                       <CodeBlock code="compact.exe /CompactOS:always" />
                     </div>
